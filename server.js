@@ -79,7 +79,6 @@ app.get('/', function (req, res) {
 var bp = require('body-parser')
 app.use(bp.json())
 app.use(bp.urlencoded({extended: true}))
-app.use(express.json())
 
 app.post('/', function(req, res){
   console.log(req.body)
