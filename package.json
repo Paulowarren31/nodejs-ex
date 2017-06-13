@@ -12,7 +12,8 @@
     "mongodb": "^2.1.16",
     "morgan": "^1.7.0",
     "object-assign":"4.1.0",
-    "body-parser":"^1.0"
+    "body-parser":"^1.0",
+    "axios":"^0.16.2"
 
   },
   "engine": {
