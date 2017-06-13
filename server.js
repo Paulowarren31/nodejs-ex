@@ -10,6 +10,7 @@ var express = require('express'),
 Object.assign=require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'pug')
 app.use(morgan('combined'))
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
@@ -46,10 +47,11 @@ app.post('/', function(req, res){
             users: resp.data
           })
 
+          //done with async stuff
           if(big_classes.length == classes.length){
             handleClasses(big_classes, function(grouped_users){
               console.log(grouped_users)
-              res.send(grouped_users)
+              res.render('people', { title: 'Hey', message: 'Hello there!', people: grouped_users})
             })
           }
         }
