@@ -1,13 +1,10 @@
 var express = require('express'),
-  fs      = require('fs'),
   app     = express(),
-  eps     = require('ejs'),
-  morgan  = require('morgan'),
-  http    = require('http'),
-  axios   = require('axios');
-hbs     = require('express-handlebars')
+  axios   = require('axios'),
+  hbs     = require('express-handlebars'),
+  path    = require('path');
 
-Object.assign=require('object-assign')
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.engine('handlebars', hbs({defaultLayout: 'main'}))
 app.set('view engine', 'handlebars')
@@ -57,24 +54,6 @@ app.post('/', function(req, res){
           }
         }
         main(cl.id, cl.name);
-        /*
-          .then(function(res){
-
-            users = res.data
-
-            for(user in users){
-              user = users[user]
-
-
-              a = user_dict.get(user.id)
-
-              console.log(a)
-
-              user_dict.set(user, user.id)
-            }
-
-          }) */
-
       }
     })
     .catch(function(res){
@@ -105,12 +84,11 @@ function handleClasses(classes, callback){
     })
     users = []
     dictionary.forEach(function(item){
-      users.push(item)
+      if(item.classes.length > 1) users.push(item)
     })
     callback(users)
 
   })
-
 
 }
 
@@ -123,8 +101,62 @@ function getUserId(callback){
   })
 }
 
-app.get('/lol', function(req,res){
-  getUserId()
+async function getUserEmail(id){
+  let url = 'https://umich-dev.instructure.com/api/v1/users/'+id
+    +'/profile?access_token='+token
+
+  profile = await axios.get(url)
+  return profile.data.primary_email
+}
+
+app.post('/create', function(req,res){
+
+  let url = 'https://umich-dev.instructure.com/api/v1/groups?access_token='
+    +token
+
+  axios.post(url, {
+    name: req.body.group_name,
+    description: 'this is a group',
+    is_public: true,
+    join_level: 'parent_context_auto_join',
+  }, {
+    headers: { Authorization: "Bearer " + token }
+  }).then(r => {
+    console.log(r)
+
+    let grp_id = r.data.id
+    let invite_url = 'https://umich-dev.instructure.com/api/v1/groups/'+grp_id
+      +'/invite?access_token='+token
+
+
+    let user_ids = req.body.user_ids.split(',')
+    console.log(user_ids)
+    let user_emails = []
+    user_ids.forEach(function(id){
+      getUserEmail(id).then(e => {
+        user_emails.push(e)
+        if(user_emails.length == user_ids.length){
+          
+
+          //all user emails ready
+          axios.post(invite_url, {
+            invitees: user_emails
+          }, {
+            headers: { Authorization: "Bearer " + token }
+          }).then(r => {
+            console.log(r)
+            res.send('success!' + user_emails + ' have been invited ')
+          })
+        }
+      })
+    })
+
+
+  })
+
+
+
+
 })
 
 // error handling

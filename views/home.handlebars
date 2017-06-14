@@ -4,6 +4,7 @@
     {{#each people}}
     <li class="list-group-item">{{this.name}}
       <small class="pl-2 text-primary">you share {{this.classes.length}} classes</small>
+      <a id="create-{{this.id}}">Create Group</a>
     </li>
     {{/each}}
   </ul>
