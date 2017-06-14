@@ -1,4 +1,3 @@
-//  OpenShift sample Node application
 var express = require('express'),
   fs      = require('fs'),
   app     = express(),
@@ -6,12 +5,12 @@ var express = require('express'),
   morgan  = require('morgan'),
   http    = require('http'),
   axios   = require('axios');
+  hbs     = require('express-handlebars')
 
 Object.assign=require('object-assign')
 
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'pug')
-app.use(morgan('combined'))
+app.engine('handlebars', hbs({defaultLayout: 'main'}))
+app.set('view engine', 'handlebars')
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
   ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
@@ -25,8 +24,6 @@ app.use(bp.urlencoded({extended: true}))
 var token = '8553~7G6yIufBJhp30vX9A6NYC68aHSEeBxlm0LalJI1ARASZ4UWFq9bXBhWZGx3dPZiV'
 
 app.post('/', function(req, res){
-
-  var user_dict = new Map();
   var big_classes = []
   axios.get('https://umich-dev.instructure.com/api/v1/courses?access_token='+token)
     .then(function(classes){
@@ -50,8 +47,13 @@ app.post('/', function(req, res){
           //done with async stuff
           if(big_classes.length == classes.length){
             handleClasses(big_classes, function(grouped_users){
+
               console.log(grouped_users)
-              res.render('people', { title: 'Hey', message: 'Hello there!', people: grouped_users})
+              res.render('home', { 
+                title: 'Hey', 
+                message: 'Hello there!', 
+                people: grouped_users})
+
             })
           }
         }
@@ -81,6 +83,7 @@ app.post('/', function(req, res){
     })
 })
 
+//all classes in the array now
 function handleClasses(classes, callback){
   dictionary = new Map();
   classes.forEach(function(cl){
