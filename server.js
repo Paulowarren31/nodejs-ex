@@ -5,7 +5,7 @@ var express = require('express'),
   morgan  = require('morgan'),
   http    = require('http'),
   axios   = require('axios');
-  hbs     = require('express-handlebars')
+hbs     = require('express-handlebars')
 
 Object.assign=require('object-assign')
 
@@ -14,7 +14,7 @@ app.set('view engine', 'handlebars')
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
   ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
-mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
+  mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
   mongoURLLabel = "";
 
 var bp = require('body-parser')
@@ -48,10 +48,9 @@ app.post('/', function(req, res){
           if(big_classes.length == classes.length){
             handleClasses(big_classes, function(grouped_users){
 
-              console.log(grouped_users)
-              res.render('home', { 
-                title: 'Hey', 
-                message: 'Hello there!', 
+              res.render('home', {
+                title: 'Hey',
+                message: 'Hello there!',
                 people: grouped_users})
 
             })
@@ -86,26 +85,47 @@ app.post('/', function(req, res){
 //all classes in the array now
 function handleClasses(classes, callback){
   dictionary = new Map();
-  classes.forEach(function(cl){
-    cl.users.forEach(function(user){
-      if(dictionary.has(user.id)){
-        dictionary.get(user.id).classes.push(cl.name)
-        //console.log('dupe')
-      }
-      else{
-        //console.log(cl)
-        user.classes = [cl.name]
-        dictionary.set(user.id, user)
-      }
+  getUserId(function(self_id){
+    classes.forEach(function(cl){
+      cl.users.forEach(function(user){
+
+        //dont include ourselves
+        if(self_id == user.id) return
+
+        if(dictionary.has(user.id)){
+          dictionary.get(user.id).classes.push(cl.name)
+          //console.log('dupe')
+        }
+        else{
+          //console.log(cl)
+          user.classes = [cl.name]
+          dictionary.set(user.id, user)
+        }
+      })
     })
+    users = []
+    dictionary.forEach(function(item){
+      users.push(item)
+    })
+    callback(users)
+
   })
 
-  users = []
-  dictionary.forEach(function(item){
-    users.push(item)
-  })
-  callback(users)
+
 }
+
+function getUserId(callback){
+  let url = 'https://umich-dev.instructure.com/api/v1/users/self?access_token='
+    +token
+
+  axios.get(url).then(function(user){
+    callback(user.data.id)
+  })
+}
+
+app.get('/lol', function(req,res){
+  getUserId()
+})
 
 // error handling
 app.use(function(err, req, res, next){

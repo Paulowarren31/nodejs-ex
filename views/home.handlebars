@@ -1,15 +1,9 @@
 <div class="container">
-  <h1 class="text-warning"> {{{title}}} </h1>
+  <h2> Students who Share Your Classes </h2>
   <ul class="list-group">
     {{#each people}}
-    <li class="list-group-item">{{this.name}} - 
-      <small class="text-primary">
-        (
-        {{#each this.classes}}
-          {{this}},
-        {{/each}}
-        )
-      </small>
+    <li class="list-group-item">{{this.name}}
+      <small class="pl-2 text-primary">you share {{this.classes.length}} classes</small>
     </li>
     {{/each}}
   </ul>
