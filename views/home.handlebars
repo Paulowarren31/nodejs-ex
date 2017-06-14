@@ -2,7 +2,15 @@
   <h1 class="text-warning"> {{{title}}} </h1>
   <ul class="list-group">
     {{#each people}}
-    <li class="list-group-item">{{this.name}}</li>
+    <li class="list-group-item">{{this.name}} - 
+      <small class="text-primary">
+        (
+        {{#each this.classes}}
+          {{this}},
+        {{/each}}
+        )
+      </small>
+    </li>
     {{/each}}
   </ul>
 </div>
