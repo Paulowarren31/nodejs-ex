@@ -26,11 +26,8 @@ app.post('/', function(req, res){
     .then(function(classes){
 
       classes = classes.data
-
-
       for(cl in classes){
         cl = classes[cl]
-
         async function main(id, name){
           resp = await axios.get('https://umich-dev.instructure.com/api/v1/courses/'+id
             +'/students?access_token='+token)
@@ -64,41 +61,40 @@ app.post('/', function(req, res){
 //all classes in the array now
 function handleClasses(classes, callback){
   dictionary = new Map();
-  getUserId(function(self_id){
-    classes.forEach(function(cl){
-      cl.users.forEach(function(user){
 
-        //dont include ourselves
-        if(self_id == user.id) return
 
-        if(dictionary.has(user.id)){
-          dictionary.get(user.id).classes.push(cl.name)
-          //console.log('dupe')
-        }
-        else{
-          //console.log(cl)
-          user.classes = [cl.name]
-          dictionary.set(user.id, user)
-        }
-      })
+  self_id = getUserId()
+
+  classes.forEach(function(cl){
+    cl.users.forEach(function(user){
+
+      //dont include ourselves
+      if(self_id == user.id) return
+
+      if(dictionary.has(user.id)){
+        dictionary.get(user.id).classes.push(cl.name)
+        //console.log('dupe')
+      }
+      else{
+        //console.log(cl)
+        user.classes = [cl.name]
+        dictionary.set(user.id, user)
+      }
     })
-    users = []
-    dictionary.forEach(function(item){
-      if(item.classes.length > 1) users.push(item)
-    })
-    callback(users)
-
   })
+  users = []
+  dictionary.forEach(function(item){
+    if(item.classes.length > 1) users.push(item)
+  })
+  callback(users)
 
 }
 
-function getUserId(callback){
-  let url = 'https://umich-dev.instructure.com/api/v1/users/self?access_token='
-    +token
+async function getUserId(){
+  let url = 'https://umich-dev.instructure.com/api/v1/users/self?access_token='+token
 
-  axios.get(url).then(function(user){
-    callback(user.data.id)
-  })
+  user = await axios.get(url)
+  return user.data.id
 }
 
 async function getUserEmail(id){
@@ -109,8 +105,8 @@ async function getUserEmail(id){
   return profile.data.primary_email
 }
 
+//creates a new group with given ids and name of group
 app.post('/create', function(req,res){
-
   let url = 'https://umich-dev.instructure.com/api/v1/groups?access_token='
     +token
 
@@ -153,12 +149,38 @@ app.post('/create', function(req,res){
 
 
   })
-
 })
 
+//step 1 oauth
 app.get('/test', function(req, res){
-  console.log(req.body)
-  res.redirect('https://learn-lti.herokuapp.com/login/oauth2/auth')
+  res.redirect('https://learn-lti.herokuapp.com/login/oauth2/auth?'+
+    'client_id=3536&response_type=code&redirect_uri=http://0.0.0.0:8080/test2')
+})
+
+//step 2 oauth
+app.get('/test2', function(req,res){
+  console.log(req.query)
+  if(req.query.error == 'access_denied'){
+    //access denied
+  }
+  //all good
+  else{
+
+    let url = 'https://learn-lti.herokuapp.com/login/oauth2/token'
+
+    axios.post(url, {
+      client_id: '3536',
+      redirect_uri: 'http://0.0.0.0:8080/test2',
+      client_secret: '63b0b9ce3d9b23a487c2',
+      code: req.query.code
+    }).then(r => console.log(r))
+
+  }
+})
+
+//step 3?
+app.get('/test3', function(req, res){
+  res.send('idk')
 })
 
 // error handling
