@@ -157,6 +157,7 @@ app.post('/create', function(req,res){
 })
 
 app.get('/test', function(req, res){
+  console.log(req.body)
   res.redirect('https://learn-lti.herokuapp.com/login/oauth2/auth')
 })
 
