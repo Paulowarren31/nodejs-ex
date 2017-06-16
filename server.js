@@ -114,6 +114,7 @@ app.post('/create', function(req,res){
   let url = 'https://umich-dev.instructure.com/api/v1/groups?access_token='
     +token
 
+  //post request to create group
   axios.post(url, {
     name: req.body.group_name,
     description: 'this is a group',
@@ -128,17 +129,16 @@ app.post('/create', function(req,res){
     let invite_url = 'https://umich-dev.instructure.com/api/v1/groups/'+grp_id
       +'/invite?access_token='+token
 
-
     let user_ids = req.body.user_ids.split(',')
-    console.log(user_ids)
     let user_emails = []
+
+
     user_ids.forEach(function(id){
       getUserEmail(id).then(e => {
         user_emails.push(e)
         if(user_emails.length == user_ids.length){
-          
-
           //all user emails ready
+          //send invite
           axios.post(invite_url, {
             invitees: user_emails
           }, {
@@ -154,9 +154,11 @@ app.post('/create', function(req,res){
 
   })
 
+})
 
-
-
+app.post('/test', function(req, res){
+  console.log('it worked')
+  console.log(req)
 })
 
 // error handling
