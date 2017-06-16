@@ -156,9 +156,8 @@ app.post('/create', function(req,res){
 
 })
 
-app.post('/test', function(req, res){
-  console.log('it worked')
-  console.log(req)
+app.get('/test', function(req, res){
+  res.redirect('https://learn-lti.herokuapp.com/login/oauth2/auth')
 })
 
 // error handling
