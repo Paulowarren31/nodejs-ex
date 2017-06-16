@@ -2,11 +2,13 @@ $(function(){
   $('[id^=create]').on('click', e => {
     alert('clicked')
 
-    let url = 'http://localhost:8080/test'
+    let url = 'http://smart-groups-canvas-groups.openshift.dsc.umich.edu/test'
     $.ajax({
       type: 'POST',
       url: url,
-      success: succ
+      success: succ,
+      data: {a:'a'},
+      dataType: 'json'
     })
   })
 })
