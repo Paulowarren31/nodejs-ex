@@ -118,7 +118,7 @@ app.post('/create', function(req,res){
     name: req.body.group_name,
     description: 'this is a group',
     is_public: true,
-    join_level: 'parent_context_auto_join',
+    join_level: 'invitation_only',
   }, {
     headers: { Authorization: "Bearer " + token }
   }).then(r => {
